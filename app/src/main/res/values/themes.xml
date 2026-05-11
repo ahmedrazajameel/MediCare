@@ -1,0 +1,11 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.MediCarePro" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#2c7da0</item>
+        <item name="colorPrimaryVariant">#1f5e7a</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#61a5c2</item>
+        <item name="colorSecondaryVariant">#3d7a97</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="android:statusBarColor">#1f5e7a</item>
+    </style>
+</resources>

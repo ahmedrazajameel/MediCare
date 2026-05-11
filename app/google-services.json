@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "778569007164",
+    "firebase_url": "https://medicarepro-719e3-default-rtdb.firebaseio.com",
+    "project_id": "medicarepro-719e3",
+    "storage_bucket": "medicarepro-719e3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:778569007164:android:fd8f7552c32c0f7efd4339",
+        "android_client_info": {
+          "package_name": "com.medical.medicarepro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAa_81IoOLPRn_WEQWY27vBFFV5L1_isY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
