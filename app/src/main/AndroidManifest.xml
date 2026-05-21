@@ -13,7 +13,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MediCarePro"
-        tools:targetApi="31">
+        tools:targetApi="31">]
+
+        <activity android:name=".ui.activities.AdminPanelActivity"
+            android:exported="false"/>
 
         <activity
             android:name=".ui.activities.SplashActivity"

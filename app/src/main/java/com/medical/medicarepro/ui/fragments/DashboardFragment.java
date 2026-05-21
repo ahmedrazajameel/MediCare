@@ -73,10 +73,21 @@ public class DashboardFragment extends Fragment {
     private void loadUserData() {
         firebaseManager.getCurrentUserData(new FirebaseManager.FirebaseCallback<User>() {
             @Override
-            public void onSuccess(User result) {
-                if (getActivity() != null) {
-                    tvUserName.setText(result.getName());
-                    tvLocation.setText(result.getLocation());
+            public void onSuccess(User user) {
+                if (getActivity() != null && user != null) {
+                    // Set user name
+                    if (user.getName() != null && !user.getName().isEmpty()) {
+                        tvUserName.setText(user.getName());
+                    } else {
+                        tvUserName.setText("Medical Officer");
+                    }
+
+                    // Set location
+                    if (user.getLocation() != null && !user.getLocation().isEmpty()) {
+                        tvLocation.setText(user.getLocation());
+                    } else {
+                        tvLocation.setText("Central");
+                    }
                 }
             }
 
@@ -95,8 +106,9 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onSuccess(List<Patient> result) {
                 if (getActivity() != null) {
-                    tvTotalPatients.setText(String.valueOf(result.size()));
-                    tvActiveCases.setText(String.valueOf(result.size()));
+                    int count = result != null ? result.size() : 0;
+                    tvTotalPatients.setText(String.valueOf(count));
+                    tvActiveCases.setText(String.valueOf(count));
                     tvTodayAppointments.setText("0");
                 }
             }

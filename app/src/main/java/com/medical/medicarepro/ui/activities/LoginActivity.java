@@ -8,15 +8,16 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.FirebaseUser;
 import com.medical.medicarepro.R;
+import com.medical.medicarepro.models.User;
 import com.medical.medicarepro.utils.FirebaseManager;
 
 public class LoginActivity extends AppCompatActivity {
-    private TextInputEditText etEmail, etPassword;
+    private TextInputEditText etUsername, etPassword;
     private MaterialButton btnLogin;
     private ProgressBar progressBar;
     private FirebaseManager firebaseManager;
+    private static User loggedInUser; // Store logged in user
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +30,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        etEmail = findViewById(R.id.etEmail);
+        etUsername = findViewById(R.id.etUsername);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         progressBar = findViewById(R.id.progressBar);
@@ -40,11 +41,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void login() {
-        String email = etEmail.getText().toString().trim();
+        String username = etUsername.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
-        if (email.isEmpty()) {
-            etEmail.setError("Email required");
+        if (username.isEmpty()) {
+            etUsername.setError("Username required");
             return;
         }
 
@@ -55,12 +56,21 @@ public class LoginActivity extends AppCompatActivity {
 
         setLoading(true);
 
-        firebaseManager.login(email, password, new FirebaseManager.FirebaseCallback<FirebaseUser>() {
+        firebaseManager.loginWithUsername(username, password, new FirebaseManager.FirebaseCallback<User>() {
             @Override
-            public void onSuccess(FirebaseUser result) {
+            public void onSuccess(User user) {
                 setLoading(false);
-                Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+
+                // Store the logged in user globally
+                loggedInUser = user;
+
+                Toast.makeText(LoginActivity.this, "Welcome " + user.getName(), Toast.LENGTH_SHORT).show();
+
+                if (user.getRole() != null && user.getRole().equals("Admin")) {
+                    startActivity(new Intent(LoginActivity.this, AdminPanelActivity.class));
+                } else {
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                }
                 finish();
             }
 
@@ -75,5 +85,10 @@ public class LoginActivity extends AppCompatActivity {
     private void setLoading(boolean isLoading) {
         progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         btnLogin.setEnabled(!isLoading);
+    }
+
+    // Static method to get logged in user
+    public static User getLoggedInUser() {
+        return loggedInUser;
     }
 }
