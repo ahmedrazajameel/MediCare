@@ -13,8 +13,14 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.medical.medicarepro.R;
 import com.medical.medicarepro.ui.activities.AddPatientActivity;
+import com.medical.medicarepro.ui.activities.LoginActivity;
 import com.medical.medicarepro.utils.FirebaseManager;
 import com.medical.medicarepro.models.Patient;
 import com.medical.medicarepro.models.User;
@@ -26,6 +32,10 @@ public class DashboardFragment extends Fragment {
     private SwipeRefreshLayout swipeRefresh;
     private FirebaseManager firebaseManager;
 
+    // Real-time listener for patients count
+    private DatabaseReference patientsRef;
+    private ValueEventListener patientsCountListener;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -33,7 +43,7 @@ public class DashboardFragment extends Fragment {
         initViews(view);
         setupListeners();
         loadUserData();
-        loadStats();
+        setupRealtimePatientCount(); // Add real-time listener for patient count
         return view;
     }
 
@@ -65,24 +75,33 @@ public class DashboardFragment extends Fragment {
         });
 
         swipeRefresh.setOnRefreshListener(() -> {
-            loadStats();
+            // Manual refresh if needed
             swipeRefresh.setRefreshing(false);
         });
     }
 
     private void loadUserData() {
+        // First try to get user from LoginActivity (stored during login)
+        User loggedInUser = LoginActivity.getLoggedInUser();
+
+        if (loggedInUser != null && loggedInUser.getName() != null) {
+            // User found from LoginActivity
+            tvUserName.setText(loggedInUser.getName());
+            tvLocation.setText(loggedInUser.getLocation() != null ? loggedInUser.getLocation() : "Central");
+            return;
+        }
+
+        // If not found, try to get from Firebase
         firebaseManager.getCurrentUserData(new FirebaseManager.FirebaseCallback<User>() {
             @Override
             public void onSuccess(User user) {
                 if (getActivity() != null && user != null) {
-                    // Set user name
                     if (user.getName() != null && !user.getName().isEmpty()) {
                         tvUserName.setText(user.getName());
                     } else {
                         tvUserName.setText("Medical Officer");
                     }
 
-                    // Set location
                     if (user.getLocation() != null && !user.getLocation().isEmpty()) {
                         tvLocation.setText(user.getLocation());
                     } else {
@@ -101,26 +120,39 @@ public class DashboardFragment extends Fragment {
         });
     }
 
-    private void loadStats() {
-        firebaseManager.getAllPatients(new FirebaseManager.DatabaseCallback<List<Patient>>() {
+    // Real-time listener for patient count - Updates instantly when patient added
+    private void setupRealtimePatientCount() {
+        patientsRef = FirebaseDatabase.getInstance().getReference("patients");
+        patientsCountListener = new ValueEventListener() {
             @Override
-            public void onSuccess(List<Patient> result) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (getActivity() != null) {
-                    int count = result != null ? result.size() : 0;
+                    int count = (int) dataSnapshot.getChildrenCount();
                     tvTotalPatients.setText(String.valueOf(count));
                     tvActiveCases.setText(String.valueOf(count));
+                    // tvTodayAppointments remains 0 for now
                     tvTodayAppointments.setText("0");
                 }
             }
 
             @Override
-            public void onFailure(Exception e) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 if (getActivity() != null) {
                     tvTotalPatients.setText("0");
                     tvActiveCases.setText("0");
                     tvTodayAppointments.setText("0");
                 }
             }
-        });
+        };
+        patientsRef.addValueEventListener(patientsCountListener);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Remove listener to prevent memory leaks
+        if (patientsRef != null && patientsCountListener != null) {
+            patientsRef.removeEventListener(patientsCountListener);
+        }
     }
 }

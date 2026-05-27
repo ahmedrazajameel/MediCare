@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.medical.medicarepro.R;
 import com.medical.medicarepro.models.User;
 import com.medical.medicarepro.ui.activities.LoginActivity;
@@ -36,14 +37,25 @@ public class ProfileFragment extends Fragment {
         // Load user data
         loadUserProfile();
 
-        btnSignOut.setOnClickListener(v -> {
-            firebaseManager.logout();
-            startActivity(new Intent(getActivity(), LoginActivity.class));
-            getActivity().finish();
-            Toast.makeText(getContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
-        });
+        btnSignOut.setOnClickListener(v -> showLogoutDialog());
 
         return view;
+    }
+
+    private void showLogoutDialog() {
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    firebaseManager.logout();
+                    Intent intent = new Intent(getActivity(), LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    getActivity().finish();
+                    Toast.makeText(getContext(), "Logged out successfully", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 
     private void loadUserProfile() {

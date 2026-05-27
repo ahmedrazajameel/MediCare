@@ -17,8 +17,8 @@ public class Patient {
     private boolean isDeceased;
     private String summary;
     private String createdBy;
-    private long createdAt;  // Changed from Timestamp to long
-    private long updatedAt;  // Changed from Timestamp to long
+    private long createdAt;
+    private long updatedAt;
 
     public Patient() {
     }
@@ -47,8 +47,12 @@ public class Patient {
         this.lastName = lastName;
     }
 
+    // FIXED: Handle null values properly
     public String getFullName() {
-        return firstName + " " + lastName;
+        String first = firstName != null ? firstName : "";
+        String last = lastName != null ? lastName : "";
+        String fullName = (first + " " + last).trim();
+        return fullName.isEmpty() ? "Unknown" : fullName;
     }
 
     public String getNhn() {

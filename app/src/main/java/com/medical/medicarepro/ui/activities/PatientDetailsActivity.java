@@ -33,10 +33,20 @@ public class PatientDetailsActivity extends AppCompatActivity {
 
     private void getPatientDataFromIntent() {
         patientId = getIntent().getStringExtra("patient_id");
+        String patientName = getIntent().getStringExtra("patient_name");
 
         patient = new Patient();
         patient.setId(patientId);
-        patient.setFirstName(getIntent().getStringExtra("patient_name"));
+
+        // Set first name only (since we don't have lastName in intent)
+        if (patientName != null && !patientName.isEmpty()) {
+            patient.setFirstName(patientName);
+            patient.setLastName(""); // Set empty string to avoid null
+        } else {
+            patient.setFirstName("Unknown");
+            patient.setLastName("");
+        }
+
         patient.setAge(getIntent().getIntExtra("patient_age", 0));
         patient.setSex(getIntent().getStringExtra("patient_sex"));
         patient.setDob(getIntent().getStringExtra("patient_dob"));
@@ -62,11 +72,20 @@ public class PatientDetailsActivity extends AppCompatActivity {
     }
 
     private void setupHeader() {
-        tvPatientNameHeader.setText(patient.getFullName());
+        // Safe display of patient name
+        String fullName = patient.getFullName();
+        tvPatientNameHeader.setText(fullName != null && !fullName.isEmpty() ? fullName : "Unknown Patient");
+
         tvAgeHeader.setText("Age: " + patient.getAge());
-        tvSexHeader.setText("Sex: " + patient.getSex());
-        tvDOBHeader.setText("DOB: " + patient.getDob());
-        tvFolderNoHeader.setText("Folder No: " + patient.getNhn());
+
+        String sex = patient.getSex();
+        tvSexHeader.setText("Sex: " + (sex != null ? sex : "Not specified"));
+
+        String dob = patient.getDob();
+        tvDOBHeader.setText("DOB: " + (dob != null ? dob : "Not specified"));
+
+        String nhn = patient.getNhn();
+        tvFolderNoHeader.setText("Folder No: " + (nhn != null ? nhn : "Not specified"));
     }
 
     private void setupViewPager() {
